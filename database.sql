@@ -1,6 +1,6 @@
 -- À coller dans Supabase : SQL Editor > New query > Run
 
--- Biens : lecture publique, aucune écriture depuis le site (vous les ajoutez dans Table Editor).
+-- Biens : lecture réservée aux membres connectés, aucune écriture depuis le site (vous les ajoutez dans Table Editor).
 create table public.biens (
   id bigint generated always as identity primary key,
   titre text not null check (char_length(titre) <= 120),
@@ -12,7 +12,7 @@ create table public.biens (
   created_at timestamptz not null default now()
 );
 alter table public.biens enable row level security;
-create policy "lecture publique" on public.biens for select using (disponible = true);
+create policy "lecture membres" on public.biens for select to authenticated using (disponible = true);
 
 -- Profils : chaque utilisateur ne voit et ne modifie que le sien.
 create table public.profils (

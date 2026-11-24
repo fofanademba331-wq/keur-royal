@@ -5,16 +5,11 @@
 // Ces clés sont publiques par conception : la sécurité vient des règles RLS de database.sql.
 // N'utilisez JAMAIS une clé "secret" ou "service_role" dans ce fichier.
 const SUPABASE_URL = "https://ykwjlsijsvpnmcmwsody.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_r2zPAbzKjoOEGwLgbrkH4w_2XdSUEZq";
+const SUPABASE_ANON_KEY = "VOTRE_CLE_ANON";
 
 const sb = window.supabase && !SUPABASE_URL.includes("VOTRE")
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const EXEMPLES = [
-  { titre: "Villa moderne avec jardin", ville: "Keur Massar", type: "Villa", prix: 65000000, surface: 300, chambres: 4 },
-  { titre: "Appartement lumineux", ville: "Dakar", type: "Appartement", prix: 38000000, surface: 95, chambres: 3 },
-  { titre: "Terrain viabilisé", ville: "Keur Massar", type: "Terrain", prix: 12000000, surface: 200, chambres: null }
-];
 const fcfa = n => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 
 // Création d'éléments avec textContent : jamais de innerHTML avec des données (protection XSS).
@@ -29,8 +24,8 @@ function carte(b) {
   const corps = el("div", "carte-corps");
   const details = [b.surface ? b.surface + " m²" : "", b.chambres ? b.chambres + " chambres" : ""].filter(Boolean).join(", ");
   corps.append(el("h3", "", b.titre), el("p", "gris", b.ville + (details ? " – " + details : "")), el("p", "prix", fcfa(b.prix)));
-  const lien = el("a", "btn3d petit", "Me renseigner");
-  lien.href = "inscription.html";
+  const lien = el("a", "btn3d petit", "Contacter l'agence");
+  lien.href = "index.html#contact";
   corps.append(lien);
   c.append(el("div", "carte-img", b.type), corps);
   return c;
@@ -38,13 +33,13 @@ function carte(b) {
 async function chargerBiens() {
   const zone = document.getElementById("liste-biens");
   if (!zone) return;
-  let biens = EXEMPLES;
-  if (sb) {
-    const { data, error } = await sb.from("biens").select("titre,ville,type,prix,surface,chambres")
-      .order("created_at", { ascending: false }).limit(12);
-    if (!error && data && data.length) biens = data;
-  }
-  zone.replaceChildren(...biens.map(carte));
+  if (!sb) { zone.textContent = "Configurez d'abord Supabase dans app.js."; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { location.href = "connexion.html"; return; }   // pas connecté : retour à la connexion
+  const { data, error } = await sb.from("biens").select("titre,ville,type,prix,surface,chambres")
+    .order("created_at", { ascending: false }).limit(24);
+  if (error) { zone.textContent = "Impossible de charger les biens. Réessayez plus tard."; return; }
+  zone.replaceChildren(...(data.length ? data.map(carte) : [el("p", "gris", "Aucun bien disponible pour le moment.")]));
 }
 
 function afficher(zone, texte, ok) { zone.textContent = texte; zone.className = "msg " + (ok ? "ok" : "err"); }
@@ -80,6 +75,7 @@ if (fc) fc.addEventListener("submit", async e => {
   } catch (_) {}
   const { data } = await sb.from("profils").select("nom").maybeSingle();
   afficher(msg, "Bienvenue" + (data && data.nom ? ", " + data.nom : "") + ".", true);
+  setTimeout(() => { location.href = "biens.html"; }, 1000);
 });
 
 // Remplit l'e-mail mémorisé (jamais le mot de passe) sur la page de connexion.
@@ -89,6 +85,13 @@ if (fc) {
     if (memo) { fc.elements.email.value = memo; fc.elements.souvenir.checked = true; }
   } catch (_) {}
 }
+
+// Déjà connecté (session mémorisée) : on va directement aux biens.
+if (fc && sb) sb.auth.getSession().then(({ data }) => { if (data.session) location.href = "biens.html"; });
+
+// Bouton de déconnexion.
+const bd = document.getElementById("deconnexion");
+if (bd) bd.addEventListener("click", async () => { if (sb) await sb.auth.signOut(); location.href = "index.html"; });
 
 // Oeil : afficher / masquer le mot de passe.
 document.querySelectorAll(".oeil").forEach(b => b.addEventListener("click", () => {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Biens disponibles – Keur Royal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="conteneur">
+    <a class="logo" href="index.html">Keur Royal</a>
+    <nav><a href="index.html">Accueil</a><button class="btn3d petit" id="deconnexion" type="button">Se déconnecter</button></nav>
+  </div></header>
+
+  <main>
+    <section><div class="conteneur">
+      <h1>Biens disponibles</h1>
+      <div class="grille" id="liste-biens"><p class="gris">Chargement des biens…</p></div>
+    </div></section>
+  </main>
+
+  <footer><div class="conteneur">© 2026 Keur Royal. Tous droits réservés.</div></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
