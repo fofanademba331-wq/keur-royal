@@ -5,7 +5,7 @@
 // Ces clés sont publiques par conception : la sécurité vient des règles RLS de database.sql.
 // N'utilisez JAMAIS une clé "secret" ou "service_role" dans ce fichier.
 const SUPABASE_URL = "https://ykwjlsijsvpnmcmwsody.supabase.co";
-const SUPABASE_ANON_KEY = "VOTRE_CLE_ANON";
+const SUPABASE_ANON_KEY = "sb_publishable_r2zPAbzKjoOEGwLgbrkH4w_2XdSUEZq";
 
 const sb = window.supabase && !SUPABASE_URL.includes("VOTRE")
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
